@@ -1,37 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/home_background"
+    android:keepScreenOn="true"
     tools:context=".Home">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="397dp"
-        android:layout_height="214dp"
-        android:text="Color Blindness Test"
-        app:layout_constraintBottom_toTopOf="@+id/button2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="395dp"
-        android:layout_height="214dp"
-        android:text="Speak to AI Assistance"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
+    <!-- Decorative logo: hidden from TalkBack, the title below is announced instead -->
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="205dp"
-        android:layout_height="184dp"
-        android:layout_marginBottom="50dp"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        android:id="@+id/logo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="48dp"
+        android:layout_marginTop="48dp"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/appTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/thirdeyelogo"
-        tools:srcCompat="@drawable/thirdeyelogo" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/thirdeyelogo" />
+
+    <TextView
+        android:id="@+id/appTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:accessibilityHeading="true"
+        android:gravity="center"
+        android:text="@string/app_name_display"
+        android:textColor="@color/home_text_primary"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/appSubtitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/appSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="@string/home_subtitle"
+        android:textColor="@color/home_text_secondary"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Large touch target covering the lower half of the screen -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
+        android:contentDescription="@string/home_button_description"
+        android:text="@string/home_button_text"
+        android:textAllCaps="false"
+        android:textColor="@color/home_button_text"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/home_button_background"
+        app:cornerRadius="32dp"
+        app:icon="@drawable/ic_mic"
+        app:iconGravity="top"
+        app:iconPadding="16dp"
+        app:iconSize="96dp"
+        app:iconTint="@color/home_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline"
+        app:rippleColor="#33000000"
+        app:strokeColor="@color/home_text_primary"
+        app:strokeWidth="3dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

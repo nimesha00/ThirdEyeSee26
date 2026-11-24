@@ -38,6 +38,20 @@ public class PrePostProcessor {
 
     static String[] mClasses;
 
+    /** Loads the note labels once. Screens other than Home can open the note reader too. */
+    static synchronized void ensureClassesLoaded(android.content.Context context) throws java.io.IOException {
+        if (mClasses != null) return;
+        java.util.List<String> classes = new ArrayList<>();
+        try (java.io.BufferedReader br = new java.io.BufferedReader(
+                new java.io.InputStreamReader(context.getAssets().open("classes_money.txt")))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                classes.add(line);
+            }
+        }
+        mClasses = classes.toArray(new String[0]);
+    }
+
     // The two methods nonMaxSuppression and IOU below are ported from https://github.com/hollance/YOLO-CoreML-MPSNNGraph/blob/master/Common/Helpers.swift
 
     /**

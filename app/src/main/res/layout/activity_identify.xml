@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The whole screen is one button: a blind user should never have to find a control. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/identifyRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clickable="true"
+    android:contentDescription="Camera. Tap anywhere to identify again."
+    android:focusable="true">
+
+    <TextureView
+        android:id="@+id/identifyPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/identifyResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:accessibilityLiveRegion="polite"
+        android:background="#CC000000"
+        android:padding="20dp"
+        android:text="Hold the phone steady…"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+</FrameLayout>

@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.ImageProxy;
+import androidx.camera.view.PreviewView;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -55,7 +56,7 @@ public class CurrencyDetection extends AbstractCameraXActivity<CurrencyDetection
     }
 
     @Override
-    protected TextureView getCameraPreviewTextureView() {
+    protected PreviewView getCameraPreviewView() {
         mResultView = findViewById(R.id.resultView);
         return ((ViewStub) findViewById(R.id.object_detection_texture_view_stub)).inflate().findViewById(R.id.object_detection_texture_view);
     }
@@ -66,8 +67,8 @@ public class CurrencyDetection extends AbstractCameraXActivity<CurrencyDetection
         mResultView.invalidate();
     }
 
-    private Bitmap imgToBitmap(Image image) {
-        Image.Plane[] planes = image.getPlanes();
+    private Bitmap imgToBitmap(ImageProxy image) {
+        ImageProxy.PlaneProxy[] planes = image.getPlanes();
         ByteBuffer yBuffer = planes[0].getBuffer();
         ByteBuffer uBuffer = planes[1].getBuffer();
         ByteBuffer vBuffer = planes[2].getBuffer();
@@ -100,8 +101,9 @@ public class CurrencyDetection extends AbstractCameraXActivity<CurrencyDetection
             if (mModule == null) {
                 mModule = LiteModuleLoader.load(Home.assetFilePath(getApplicationContext(), "money4best.torchscript.ptl"));
             }
+            PrePostProcessor.ensureClassesLoaded(getApplicationContext());
 
-            Bitmap bitmap = imgToBitmap(image.getImage());
+            Bitmap bitmap = imgToBitmap(image);
             Matrix matrix = new Matrix();
             matrix.postRotate(90.0f);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);

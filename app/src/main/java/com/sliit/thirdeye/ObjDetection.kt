@@ -85,6 +85,13 @@ class ObjDetection : AppCompatActivity() {
     private var clock: Boolean = false
     private var vase: Boolean = false
 
+    // The model runs on its own thread. Running it on the UI thread for every camera
+    // frame froze the screen: taps and the Back button took seconds to register.
+    private lateinit var inferenceThread: HandlerThread
+    private lateinit var inferenceHandler: Handler
+    @Volatile private var inferenceBusy = false
+    @Volatile private var ttsReady = false
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,6 +110,23 @@ class ObjDetection : AppCompatActivity() {
         val handlerThread = HandlerThread("videoThread")
         handlerThread.start()
         handler = Handler(handlerThread.looper)
+
+        inferenceThread = HandlerThread("inferenceThread")
+        inferenceThread.start()
+        inferenceHandler = Handler(inferenceThread.looper)
+
+        // One speech engine for the whole screen, instead of a new one per announcement.
+        tts = TextToSpeech(applicationContext) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts.language = Locale("en", "LK")
+                tts.setSpeechRate(1f)
+                ttsReady = true
+                tts.speak(
+                    "Live object detection is on. Press back to stop.",
+                    TextToSpeech.QUEUE_FLUSH, null, "intro"
+                )
+            }
+        }
 
         imageView = findViewById(R.id.imageView2)
 
@@ -128,7 +152,17 @@ class ObjDetection : AppCompatActivity() {
             }
 
             override fun onSurfaceTextureUpdated(p0: SurfaceTexture) {
-                bitmap = textureView.bitmap!!
+                // Skip frames while the model is still working on the previous one.
+                if (inferenceBusy || isFinishing || textureView.width == 0) return
+                // Half size is plenty for a 300x300 model and much cheaper to copy on the UI thread.
+                val frame = textureView.getBitmap(textureView.width / 2, textureView.height / 2) ?: return
+                inferenceBusy = true
+                inferenceHandler.post { runDetection(frame) }
+            }
+
+            fun runDetection(frame: Bitmap) {
+                try {
+                bitmap = frame
                 // Creates inputs for reference.
                 var image = TensorImage.fromBitmap(bitmap)
                 image = imageProcessor.process(image)
@@ -223,7 +257,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 person = true
                             }
@@ -277,7 +311,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 bicycle = true;
                             }
@@ -331,7 +365,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 car = true
                             }
@@ -386,7 +420,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 motorcycle=true
                             }
@@ -441,7 +475,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 bus=true
                             }
@@ -495,7 +529,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 truck = true
                             }
@@ -549,7 +583,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 trafficlight = true
                             }
@@ -603,7 +637,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 stopsign = true
                             }
@@ -657,7 +691,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 cat = true
                             }
@@ -711,7 +745,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 dog = true
                             }
@@ -765,7 +799,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 cow = true
                             }
@@ -819,7 +853,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 backpack=true
                             }
@@ -873,7 +907,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 bottle = true
                             }
@@ -927,7 +961,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 chair = true;
                             }
@@ -981,7 +1015,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 couch = true;
                             }
@@ -1036,7 +1070,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 pottedPlant= true;
                             }
@@ -1090,7 +1124,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 diningTable=true
                             }
@@ -1144,7 +1178,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 tv=true;
                             }
@@ -1196,7 +1230,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 laptop=true
                             }
@@ -1250,7 +1284,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 mouse=true
                             }
@@ -1304,7 +1338,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 remote=true
                             }
@@ -1359,7 +1393,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 keyboard=true
                             }
@@ -1413,7 +1447,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 cellPhone = true
                             }
@@ -1432,7 +1466,7 @@ class ObjDetection : AppCompatActivity() {
                                 paint
                             )
                             speakAIAssistant(
-                                 "Door is" + distanceInInt.toString() + "ft in front of you"
+                                 "Door is " + distanceInInt.toString() + " feet in front of you"
                             )
 
                         }else if(labels.get(classes.get(index).toInt()) == "book"){
@@ -1484,7 +1518,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 refrigerator = true
                             }
@@ -1538,7 +1572,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 book = true
                             }
@@ -1593,7 +1627,7 @@ class ObjDetection : AppCompatActivity() {
                                 speakAIAssistant(
                                     labels.get(
                                         classes.get(index).toInt()
-                                    ) + "is" + distanceInInt.toString() + "ft in front of you"
+                                    ) + " is " + distanceInInt.toString() + " feet in front of you"
                                 )
                                 vase = true
 
@@ -1640,8 +1674,14 @@ class ObjDetection : AppCompatActivity() {
                     }
                 }
 
-                imageView.setImageBitmap(mutable)
-
+                runOnUiThread {
+                    if (!isDestroyed) imageView.setImageBitmap(mutable)
+                    inferenceBusy = false
+                }
+                } catch (e: Exception) {
+                    android.util.Log.e("ObjDetection", "Detection failed on a frame", e)
+                    inferenceBusy = false
+                }
             }
         }
 
@@ -1661,12 +1701,19 @@ class ObjDetection : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        model.close()
+        // Close the model on the inference thread itself, after the frame in progress.
+        // Closing it from here while a frame was still running crashed the app (SIGSEGV).
+        val modelToClose = model
+        inferenceHandler.post { modelToClose.close() }
+        inferenceThread.quitSafely()
+        // Release the camera, or it can stay locked for the next screen that needs it.
+        if (::cameraDevice.isInitialized) cameraDevice.close()
+        handler.looper.quitSafely()
         if (::tts.isInitialized) {
             tts.stop()
             tts.shutdown()
         }
+        super.onDestroy()
     }
 
 
@@ -1738,17 +1785,10 @@ class ObjDetection : AppCompatActivity() {
     }
 
     // function for speaking
+    // Called from the inference thread; TextToSpeech.speak is safe to call from any thread.
     private fun speakAIAssistant(text: String) {
-        // Initialize text-to-speech engine
-        tts = TextToSpeech(this) { status ->
-            if (status != TextToSpeech.ERROR) {
-                tts.language = Locale("EN", "LK")
-                tts.setSpeechRate(1f)
-                tts.setPitch(1f)
-                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
-
-            }
+        if (ttsReady) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "detection")
         }
-
     }
 }

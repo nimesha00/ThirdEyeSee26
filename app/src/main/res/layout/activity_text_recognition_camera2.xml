@@ -20,6 +20,7 @@
         android:id="@+id/imageButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#000000"
         android:contentDescription="Take photo and read the text"
         android:paddingTop="40dp"
         android:paddingBottom="40dp"

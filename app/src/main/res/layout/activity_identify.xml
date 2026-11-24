@@ -9,7 +9,7 @@
     android:contentDescription="Camera. Tap anywhere to identify again."
     android:focusable="true">
 
-    <TextureView
+    <androidx.camera.view.PreviewView
         android:id="@+id/identifyPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,9 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:accessibilityLiveRegion="polite"
-        android:background="#CC000000"
+        android:background="#211E1E"
         android:padding="20dp"
         android:text="Hold the phone steady…"
-        android:textColor="#FFFFFF"
+        android:textColor="#FFEDED"
         android:textSize="24sp" />
 </FrameLayout>

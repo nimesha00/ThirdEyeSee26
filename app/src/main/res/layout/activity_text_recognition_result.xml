@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#978B8B"
     tools:context=".TextRecognitionResultActivity">
 
     <ScrollView
@@ -61,6 +62,7 @@
             android:id="@+id/btnCheckagain"
             android:layout_width="match_parent"
             android:layout_height="100dp"
+            android:background="#7C7777"
             android:text="Check Again" />
     </LinearLayout>
 

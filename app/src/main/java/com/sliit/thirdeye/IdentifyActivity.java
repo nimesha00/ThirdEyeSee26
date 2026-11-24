@@ -9,22 +9,27 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
-import android.view.Surface;
-import android.view.TextureView;
-import android.view.ViewGroup;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.CameraX;
+import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureConfig;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
-import androidx.camera.core.PreviewConfig;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.nio.ByteBuffer;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Takes a photo, asks the vision backend what is in it, and speaks the answer.
@@ -39,9 +44,10 @@ public class IdentifyActivity extends AppCompatActivity {
     // Time to hold the phone still after the screen opens, before the first photo.
     private static final long FIRST_CAPTURE_DELAY_MS = 1800;
 
-    private TextureView preview;
+    private PreviewView preview;
     private TextView resultView;
     private ImageCapture imageCapture;
+    private ExecutorService cameraExecutor;
     private VisionClient visionClient;
     private VisionClient.Mode mode;
     private String question;
@@ -85,11 +91,11 @@ public class IdentifyActivity extends AppCompatActivity {
             }
         });
 
+        cameraExecutor = Executors.newSingleThreadExecutor();
         findViewById(R.id.identifyRoot).setOnClickListener(v -> captureAndIdentify());
-        preview.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> updateTransform());
 
         if (CameraPermissions.ensure(this, false)) {
-            preview.post(this::startCamera);
+            startCamera();
         }
     }
 
@@ -97,29 +103,35 @@ public class IdentifyActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (CameraPermissions.onResult(this, requestCode, grantResults)) {
-            preview.post(this::startCamera);
+            startCamera();
         }
     }
 
     private void startCamera() {
-        Preview cameraPreview = new Preview(new PreviewConfig.Builder().build());
-        cameraPreview.setOnPreviewOutputUpdateListener(output -> {
-            // Re-attaching the TextureView is required for CameraX 1.0.0-alpha05 to show the new surface.
-            ViewGroup parent = (ViewGroup) preview.getParent();
-            parent.removeView(preview);
-            parent.addView(preview, 0);
-            preview.setSurfaceTexture(output.getSurfaceTexture());
-            updateTransform();
-        });
+        ListenableFuture<ProcessCameraProvider> future = ProcessCameraProvider.getInstance(this);
+        future.addListener(() -> {
+            ProcessCameraProvider provider;
+            try {
+                provider = future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e("Identify", "Camera provider unavailable", e);
+                finishAttempt("Sorry, the camera couldn't start.");
+                return;
+            }
 
-        imageCapture = new ImageCapture(new ImageCaptureConfig.Builder()
-                .setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
-                .build());
+            Preview cameraPreview = new Preview.Builder().build();
+            cameraPreview.setSurfaceProvider(preview.getSurfaceProvider());
+            imageCapture = new ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                    .build();
 
-        CameraX.bindToLifecycle(this, cameraPreview, imageCapture);
+            provider.unbindAll();
+            provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, cameraPreview, imageCapture);
 
-        speak(introFor(mode));
-        handler.postDelayed(this::captureAndIdentify, FIRST_CAPTURE_DELAY_MS);
+            // Only schedule the first photo once the camera is actually bound.
+            speak(introFor(mode));
+            handler.postDelayed(this::captureAndIdentify, FIRST_CAPTURE_DELAY_MS);
+        }, ContextCompat.getMainExecutor(this));
     }
 
     private static String introFor(VisionClient.Mode mode) {
@@ -140,10 +152,11 @@ public class IdentifyActivity extends AppCompatActivity {
         busy = true;
         show("Looking…");
 
-        imageCapture.takePicture(new ImageCapture.OnImageCapturedListener() {
+        // Decode and rotate on the camera thread; only the result goes back to the UI thread.
+        imageCapture.takePicture(cameraExecutor, new ImageCapture.OnImageCapturedCallback() {
             @Override
-            public void onCaptureSuccess(ImageProxy image, int rotationDegrees) {
-                Bitmap photo = toBitmap(image, rotationDegrees);
+            public void onCaptureSuccess(@NonNull ImageProxy image) {
+                Bitmap photo = toBitmap(image, image.getImageInfo().getRotationDegrees());
                 image.close();
                 if (photo == null) {
                     runOnUiThread(() -> finishAttempt("Sorry, the photo didn't work. Tap the screen to try again."));
@@ -153,7 +166,8 @@ public class IdentifyActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(ImageCapture.UseCaseError error, String message, Throwable cause) {
+            public void onError(@NonNull ImageCaptureException e) {
+                Log.e("Identify", "Capture failed", e);
                 runOnUiThread(() -> finishAttempt("Sorry, the camera couldn't take a photo. Tap the screen to try again."));
             }
         });
@@ -223,25 +237,10 @@ public class IdentifyActivity extends AppCompatActivity {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
     }
 
-    private void updateTransform() {
-        if (preview.getDisplay() == null) return;
-        float cx = preview.getWidth() / 2f;
-        float cy = preview.getHeight() / 2f;
-        float degrees;
-        switch (preview.getDisplay().getRotation()) {
-            case Surface.ROTATION_90: degrees = 90f; break;
-            case Surface.ROTATION_180: degrees = 180f; break;
-            case Surface.ROTATION_270: degrees = 270f; break;
-            default: degrees = 0f;
-        }
-        Matrix matrix = new Matrix();
-        matrix.postRotate(-degrees, cx, cy);
-        preview.setTransform(matrix);
-    }
-
     @Override
     protected void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        if (cameraExecutor != null) cameraExecutor.shutdown();
         if (tts != null) {
             tts.stop();
             tts.shutdown();

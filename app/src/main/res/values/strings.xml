@@ -1,11 +1,40 @@
 <resources>
     <string name="app_name">Third Eye</string>
+    <string name="app_name_display">Third Eye</string>
+    <string name="home_subtitle">Your voice-guided assistant</string>
+    <string name="home_button_text">Tap to speak</string>
+    <string name="home_button_description">Speak to Third Eye. Double tap, then say what you need.</string>
+    <string name="home_quick_actions">Quick actions</string>
+
+    <string name="tile_describe">What is this?</string>
+    <string name="tile_money">Money</string>
+    <string name="tile_text">Read text</string>
+    <string name="tile_display">Read display</string>
+    <string name="tile_around">Around me</string>
+    <string name="tile_messages">Messages</string>
+
+    <string name="splash_loading">Getting ready…</string>
+
+    <string name="identify_title_describe">What is this?</string>
+    <string name="identify_title_money">Money</string>
+    <string name="identify_title_text">Read text</string>
+    <string name="identify_title_display">Read display</string>
+    <string name="identify_hint">Tap anywhere to check again</string>
+    <string name="identify_holding">Hold the phone steady…</string>
+    <string name="close">Close</string>
+
+    <string name="note_reader_title">Note reader</string>
+    <string name="live_detection_title">Live detection</string>
+    <string name="live_detection_hint">Press back to stop</string>
+
+    <string name="ocr_title">Read text</string>
+    <string name="ocr_capture">Take photo</string>
+    <string name="ocr_capture_description">Take photo and read the text</string>
+    <string name="ocr_result_title">Recognised text</string>
+    <string name="ocr_check_again">Check again</string>
+
+    <!-- Legacy strings kept for older code paths. -->
     <string name="take_photo">Take Photo</string>
     <string name="start_capture">Start Capture</string>
     <string name="stop_capture">Stop Capture</string>
-    <string name="todo">TODO</string>
-    <string name="app_name_display">Third Eye</string>
-    <string name="home_subtitle">Your voice-guided assistant</string>
-    <string name="home_button_text">Tap here to speak</string>
-    <string name="home_button_description">Speak. Double tap to start voice command.</string>
 </resources>

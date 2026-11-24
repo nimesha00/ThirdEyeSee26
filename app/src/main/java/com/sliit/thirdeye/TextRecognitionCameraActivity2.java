@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -52,8 +51,7 @@ public class TextRecognitionCameraActivity2 extends AppCompatActivity {
         previewView = findViewById(R.id.textureView);
         cameraExecutor = Executors.newSingleThreadExecutor();
 
-        ImageButton button = findViewById(R.id.imageButton);
-        button.setOnClickListener(v -> takePhoto());
+        findViewById(R.id.imageButton).setOnClickListener(v -> takePhoto());
 
         // Captures are saved to MediaStore, which needs storage access before Android 10.
         if (CameraPermissions.ensure(this, true)) {

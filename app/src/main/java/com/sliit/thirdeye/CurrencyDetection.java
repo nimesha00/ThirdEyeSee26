@@ -164,13 +164,6 @@ public class CurrencyDetection extends AbstractCameraXActivity<CurrencyDetection
         return new AnalysisResult(results);
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(CurrencyDetection.this,MainActivity.class);
-        startActivity(intent);
-        super.onBackPressed();
-    }
-
     // function for speaking
     private void Speak_AIAssistant(String text) {
         tts = new TextToSpeech(getApplicationContext(), status -> {

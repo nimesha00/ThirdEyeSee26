@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/te_background"
     tools:context=".CurrencyDetection">
 
     <ViewStub
@@ -34,8 +35,17 @@
         android:layout_marginEnd="10dp"
         android:background="#211E1E"
         android:text=""
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resultView" />
+
+    <TextView
+        style="@style/Widget.ThirdEye.ScreenLabel"
+        android:layout_margin="16dp"
+        android:fitsSystemWindows="true"
+        android:text="@string/note_reader_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

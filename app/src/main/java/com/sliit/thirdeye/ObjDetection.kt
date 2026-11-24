@@ -92,6 +92,13 @@ class ObjDetection : AppCompatActivity() {
     @Volatile private var inferenceBusy = false
     @Volatile private var ttsReady = false
 
+    // If the previous screen is still releasing the camera, the first open can deliver
+    // no frames at all (black screen). Reopen if nothing arrives within this time.
+    @Volatile private var lastFrameAt = 0L
+    private var reopenAttempts = 0
+    private val noFrameTimeoutMs = 3000L
+    private val maxReopenAttempts = 2
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,6 +159,7 @@ class ObjDetection : AppCompatActivity() {
             }
 
             override fun onSurfaceTextureUpdated(p0: SurfaceTexture) {
+                lastFrameAt = android.os.SystemClock.elapsedRealtime()
                 // Skip frames while the model is still working on the previous one.
                 if (inferenceBusy || isFinishing || textureView.width == 0) return
                 // Half size is plenty for a 300x300 model and much cheaper to copy on the UI thread.
@@ -1736,6 +1744,7 @@ class ObjDetection : AppCompatActivity() {
 
                             override fun onConfigured(p0: CameraCaptureSession) {
                                 p0.setRepeatingRequest(captureRequest.build(), null, null)
+                                scheduleNoFrameCheck()
                             }
 
                             override fun onConfigureFailed(p0: CameraCaptureSession) {
@@ -1754,6 +1763,20 @@ class ObjDetection : AppCompatActivity() {
                 }
             }, handler
         )
+    }
+
+    /** Reopens the camera if no preview frame arrives soon after it starts streaming. */
+    private fun scheduleNoFrameCheck() {
+        val startedAt = android.os.SystemClock.elapsedRealtime()
+        textureView.postDelayed({
+            if (isFinishing || isDestroyed) return@postDelayed
+            if (lastFrameAt < startedAt && reopenAttempts < maxReopenAttempts) {
+                reopenAttempts++
+                android.util.Log.w("ObjDetection", "No camera frames after ${noFrameTimeoutMs}ms; reopening (attempt $reopenAttempts)")
+                if (::cameraDevice.isInitialized) cameraDevice.close()
+                open_camera()
+            }
+        }, noFrameTimeoutMs)
     }
 
     fun get_permission() {

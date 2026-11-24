@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+        Third Eye palette: black with signal yellow, the high-contrast scheme most
+        readable for low-vision users. Text pairs are all above WCAG AAA (7:1):
+          text_primary on background  21:1
+          text_secondary on background 13:1
+          on_accent on accent          15:1
+    -->
+    <color name="te_background">#FF000000</color>
+    <color name="te_surface">#FF16181D</color>
+    <color name="te_surface_raised">#FF22252C</color>
+    <color name="te_stroke">#FF3A3F4A</color>
+    <color name="te_accent">#FFFFD600</color>
+    <color name="te_accent_pressed">#FFE6C000</color>
+    <color name="te_on_accent">#FF000000</color>
+    <color name="te_text_primary">#FFFFFFFF</color>
+    <color name="te_text_secondary">#FFC9CDD6</color>
+    <color name="te_scrim">#D9000000</color>
+    <color name="te_error">#FFFF8A80</color>
+
+    <!-- Older names still referenced by some layouts. -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="home_background">@color/te_background</color>
+    <color name="home_text_primary">@color/te_text_primary</color>
+    <color name="home_text_secondary">@color/te_text_secondary</color>
+    <color name="home_button_background">@color/te_accent</color>
+    <color name="home_button_text">@color/te_on_accent</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="home_background">#000000</color>
-    <color name="home_text_primary">#FFFFFF</color>
-    <color name="home_text_secondary">#E0E0E0</color>
-    <color name="home_button_background">#FFD600</color>
-    <color name="home_button_text">#000000</color>
 </resources>

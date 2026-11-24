@@ -1,23 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/te_background"
     tools:context=".ObjDetection">
 
     <TextureView
         android:id="@+id/textureView2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
+    <!-- Annotated frames (boxes and labels) are drawn into this view. -->
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/home_background"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@color/te_background"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/Widget.ThirdEye.ScreenLabel"
+            android:text="@string/live_detection_title" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_card"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp"
+            android:text="@string/live_detection_hint"
+            android:textAppearance="@style/TextAppearance.ThirdEye.Caption" />
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,32 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/te_background"
     tools:context=".TextRecognitionCameraActivity2">
 
     <androidx.camera.view.PreviewView
         android:id="@+id/textureView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:importantForAccessibility="no" />
 
-    <ImageButton
+    <TextView
+        style="@style/Widget.ThirdEye.ScreenLabel"
+        android:layout_margin="16dp"
+        android:fitsSystemWindows="true"
+        android:text="@string/ocr_title" />
+
+    <!-- Capture: a large yellow button along the bottom edge, easy to find by touch. -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/imageButton"
+        style="@style/Widget.ThirdEye.PrimaryButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#000000"
-        android:contentDescription="Take photo and read the text"
-        android:paddingTop="40dp"
-        android:paddingBottom="40dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_camera" />
+        android:layout_height="96dp"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/ocr_capture_description"
+        android:text="@string/ocr_capture"
+        app:icon="@drawable/ic_camera"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp"
+        app:iconSize="32dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

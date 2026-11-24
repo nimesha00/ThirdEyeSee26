@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,7 @@ public class IdentifyActivity extends AppCompatActivity {
 
     private PreviewView preview;
     private TextView resultView;
+    private View progress;
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
     private VisionClient visionClient;
@@ -70,13 +72,15 @@ public class IdentifyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_identify);
-        if (getSupportActionBar() != null) getSupportActionBar().hide();
-
         preview = findViewById(R.id.identifyPreview);
         resultView = findViewById(R.id.identifyResult);
+        progress = findViewById(R.id.identifyProgress);
         visionClient = new VisionClient(this);
         mode = VisionClient.Mode.fromWire(getIntent().getStringExtra(EXTRA_MODE));
         question = getIntent().getStringExtra(EXTRA_QUESTION);
+
+        ((TextView) findViewById(R.id.identifyTitle)).setText(titleFor(mode));
+        findViewById(R.id.identifyClose).setOnClickListener(v -> finish());
 
         // One engine for the whole screen; creating one per sentence leaks engines and cuts speech off.
         tts = new TextToSpeech(getApplicationContext(), status -> {
@@ -134,6 +138,19 @@ public class IdentifyActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
+    private static int titleFor(VisionClient.Mode mode) {
+        switch (mode) {
+            case MONEY:
+                return R.string.identify_title_money;
+            case DISPLAY:
+                return R.string.identify_title_display;
+            case TEXT:
+                return R.string.identify_title_text;
+            default:
+                return R.string.identify_title_describe;
+        }
+    }
+
     private static String introFor(VisionClient.Mode mode) {
         switch (mode) {
             case MONEY:
@@ -150,6 +167,7 @@ public class IdentifyActivity extends AppCompatActivity {
     private void captureAndIdentify() {
         if (busy || imageCapture == null) return;
         busy = true;
+        progress.setVisibility(View.VISIBLE);
         show("Looking…");
 
         // Decode and rotate on the camera thread; only the result goes back to the UI thread.
@@ -198,6 +216,7 @@ public class IdentifyActivity extends AppCompatActivity {
 
     private void openOffline(String speech, Class<?> activity) {
         busy = false;
+        progress.setVisibility(View.GONE);
         show(speech);
         speak(speech);
         // Let the explanation start before the camera screen changes underneath it.
@@ -209,6 +228,7 @@ public class IdentifyActivity extends AppCompatActivity {
 
     private void finishAttempt(String speech) {
         busy = false;
+        progress.setVisibility(View.GONE);
         show(speech);
         speak(speech);
     }

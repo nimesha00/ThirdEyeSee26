@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The whole screen is one button: a blind user should never have to find a control. -->
+<!--
+    Full-screen camera. The whole screen is one button (tap anywhere to check again)
+    so a blind user never has to find a control; the close button is for sighted helpers.
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/identifyRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="@color/te_background"
     android:clickable="true"
-    android:contentDescription="Camera. Tap anywhere to identify again."
+    android:contentDescription="@string/identify_hint"
     android:focusable="true">
 
     <androidx.camera.view.PreviewView
@@ -15,15 +19,79 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no" />
 
-    <TextView
-        android:id="@+id/identifyResult"
+    <!-- Top bar: what this screen is doing, and a way out. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/identifyTitle"
+            style="@style/Widget.ThirdEye.ScreenLabel"
+            android:text="@string/identify_title_describe" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/identifyClose"
+            style="@style/Widget.ThirdEye.IconButton"
+            android:contentDescription="@string/close"
+            app:icon="@drawable/ic_close" />
+    </LinearLayout>
+
+    <!-- Answer panel -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:accessibilityLiveRegion="polite"
-        android:background="#211E1E"
-        android:padding="20dp"
-        android:text="Hold the phone steady…"
-        android:textColor="#FFEDED"
-        android:textSize="24sp" />
+        android:background="@drawable/bg_panel"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="28dp">
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/identifyProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:importantForAccessibility="no"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/te_accent"
+            app:trackColor="@color/te_surface_raised"
+            app:trackCornerRadius="4dp"
+            app:trackThickness="6dp" />
+
+        <TextView
+            android:id="@+id/identifyResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityLiveRegion="polite"
+            android:maxLines="10"
+            android:scrollbars="vertical"
+            android:text="@string/identify_holding"
+            android:textAppearance="@style/TextAppearance.ThirdEye.Body"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/identifyHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:importantForAccessibility="no"
+            android:text="@string/identify_hint"
+            android:textAppearance="@style/TextAppearance.ThirdEye.Caption"
+            android:textColor="@color/te_accent"
+            app:drawableStartCompat="@drawable/ic_refresh"
+            app:drawableTint="@color/te_accent" />
+    </LinearLayout>
 </FrameLayout>

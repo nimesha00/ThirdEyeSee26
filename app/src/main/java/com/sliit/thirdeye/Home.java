@@ -123,6 +123,21 @@ public class Home extends AppCompatActivity {
         Button speakButton = findViewById(R.id.button2);
         speakButton.setOnClickListener(v -> speakThen("Speak now.", () -> listen(RC_COMMAND)));
 
+        // Shortcut tiles run the same actions as the matching voice commands.
+        findViewById(R.id.tileDescribe).setOnClickListener(v ->
+                IdentifyActivity.start(this, VisionClient.Mode.DESCRIBE, null));
+        findViewById(R.id.tileMoney).setOnClickListener(v ->
+                IdentifyActivity.start(this, VisionClient.Mode.MONEY, null));
+        findViewById(R.id.tileText).setOnClickListener(v ->
+                IdentifyActivity.start(this, VisionClient.Mode.TEXT, null));
+        findViewById(R.id.tileDisplay).setOnClickListener(v ->
+                IdentifyActivity.start(this, VisionClient.Mode.DISPLAY, null));
+        findViewById(R.id.tileAround).setOnClickListener(v -> {
+            speak("Opening live object detection.");
+            startActivity(new Intent(this, ObjDetection.class));
+        });
+        findViewById(R.id.tileMessages).setOnClickListener(v -> readMessages());
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
@@ -133,7 +148,7 @@ public class Home extends AppCompatActivity {
             new WeatherLookup().execute();
         }
 
-        speak("Hello! I'm Third Eye, your assistant. Touch the bottom half of the screen and tell me what you need. "
+        speak("Hello! I'm Third Eye, your assistant. Touch the big button at the bottom of the screen and tell me what you need. "
                 + "For example, say: what is this, what note is this, or read my messages.");
     }
 
